@@ -1,21 +1,25 @@
 import express from "express";
-import pkg from "twilio";
-
-const { twiml: Twiml } = pkg;
+import twilio from "twilio";
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 
-app.post("/voice", (req, res) => {
-  const response = new Twiml.VoiceResponse();
+// ✅ FIX: support BOTH GET and POST
+app.all("/voice", (req, res) => {
+  const response = new twilio.twiml.VoiceResponse();
 
-  response.say("Hello, I am your AI assistant. How can I help you?");
+  response.say("Hello, I am your AI assistant. Connecting your call.");
 
-  // transfer call
   response.dial("+919784503651");
 
   res.type("text/xml");
   res.send(response.toString());
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+// health check
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
